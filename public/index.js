@@ -1,17 +1,21 @@
 //ao carregar o documento valida se já existe token setado
 document.addEventListener("DOMContentLoaded", ()=>{ 
 
-    let dados; // Variável global para armazenar a resposta
-
     //checar se já existe token
-
-    fetchAndStoreToken();
-
+    if(isTokenValid()){
+        console.log("Token ainda válido... redicionando para /home");
+        //logica para redirecionar para home
+        
+    } else { // Caso token não exista ou seja inválido será feita busca de um novo
+        fetchAndStoreToken();
+    }
 
     async function fetchAndStoreToken(){
 
         document.getElementById('loginForm').addEventListener('submit', async function(event) {
             event.preventDefault(); // Evita o comportamento padrão do formulário
+
+            let dados; // Variável para armazenar a resposta
     
             console.log(event.type);
             console.log(event.target);
@@ -52,7 +56,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
                 //cria a data de validade do token e seta ele no sessionStorage
                 const now = new Date().getTime();
-                const expiryTimeInSeconds = 3600;
+                const expiryTimeInSeconds = 10;
                 const expiry = now + expiryTimeInSeconds * 1000;
 
                 const item = {
@@ -63,11 +67,26 @@ document.addEventListener("DOMContentLoaded", ()=>{
                 sessionStorage.setItem('tokenData', JSON.stringify(item));
 
                 console.log("Definiu corretamente o token no navegador :", sessionStorage.getItem("tokenData"));
-
                 console.log("Recuperando valor depois de definido :", JSON.parse(sessionStorage.getItem("tokenData")).access_token)
 
             }
         });
+    }
+
+    function isTokenValid() { //Funcao que retorna um booleano para status de token
+
+        const now = new Date().getTime();
+
+        let tokenData = JSON.parse(sessionStorage.getItem("tokenData"))
+
+        if(!tokenData || tokenData.expiry < now) {
+            console.log("Token inválido. Necessário autenticação...")
+            return false
+        } 
+
+        console.log("Token ainda válido, sem necessidade de renovação")
+        return true
+        
     }
 })
 
