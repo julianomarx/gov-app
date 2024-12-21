@@ -12,6 +12,10 @@ app.get('/', (req, res) => {
     
 });
 
+app.get('/home', (req, res) => {
+    res.redirect('/home.html'); 
+});
+
 app.post('/get-token', async (req, res) =>{
     try {
 
