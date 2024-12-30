@@ -26,30 +26,16 @@ async function fetchAndStoreToken(event) {
             throw new Error(`Erro na API: ${errorText}`);
         }
 
-        // Processa a resposta JSON
-        const jwtToken = await retorno.json();
-        console.log('Token recebido:', jwtToken);
+        // Aguarda a resposta do servidor
+        const response = await retorno.json();
 
-        //armazena em sessionStorage o Token
-        sessionStorage.setItem('jwtToken', JSON.stringify(jwtToken))
+        if(response.ok) { 
+            console.log('Login bem sucedido!')
 
-        console.log(JSON.parse(sessionStorage.getItem('jwtToken')))
-
-        // Cria e armazena a data de validade do token
-        // const now = new Date().getTime();
-        // const expiry = now + 3580 * 1000; 
-
-        // const item = {
-        //     access_token: dados.access_token,
-        //     expiry: expiry
-        // };
-
-        // sessionStorage.setItem('tokenData', JSON.stringify(item));
-        // console.log("Token armazenado:", sessionStorage.getItem("tokenData"));
-        // console.log("Recuperando apenas o token :", JSON.parse(sessionStorage.getItem("tokenData")).access_token)
-
-        //logica para redirecionar para home 
-        //window.location.href = '/home';
+            window.location.href = '/home';
+        }
+        
+        //monta a requisicao para
 
 
     } catch (error) {
