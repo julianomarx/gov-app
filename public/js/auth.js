@@ -31,7 +31,6 @@ async function fetchAndStoreToken(event) {
 
         if(response.ok) { 
             console.log('Login bem sucedido!')
-
             window.location.href = '/home';
         }
         
@@ -42,20 +41,5 @@ async function fetchAndStoreToken(event) {
         console.error('Erro na requisição:', error.message);
     }
 }
-
-// function isTokenValid() { //Funcao que retorna um booleano para status de token
-
-//     const now = new Date().getTime();
-
-//     const tokenData = JSON.parse(sessionStorage.getItem("tokenData"))
-
-//     if(!tokenData || tokenData.expiry < now) {
-//         console.log("Token inválido. Necessário autenticação...")
-//         return false
-//     } 
-
-//     console.log("Token ainda válido, sem necessidade de renovação")
-//     return true
-// }
 
 export { fetchAndStoreToken }

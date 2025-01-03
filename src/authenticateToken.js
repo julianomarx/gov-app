@@ -10,12 +10,12 @@ function authenticateToken(req, res, next) {
 
 
     if(!token) { //Valida se houve entrega de token na requisicao
-        return res.status(401).json({ error: 'Token não fornecido' })
+        return res.redirect('/');
     }
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if(err) {
-            return res.status(403).json({ error: 'Token inválido ou expirado' })
+            return res.redirect('/'); // Se o o jwt.verify retornar erro ira redirecionar para /
         }
 
         req.user = user;

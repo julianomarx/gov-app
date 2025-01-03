@@ -1,37 +1,67 @@
-require('dotenv').config(); // importa o dotenv para poder utilizar as variáveis de ambiente pelo process.env
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const getToken = require('./src/getToken');
-const authenticateToken = require('./src/authenticateToken')
+const authenticateToken = require('./src/authenticateToken');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
-const { strict } = require('assert');
 
 const app = express();
 
+const SECRET_KEY = process.env.JWT_SECRET;
+
+// Middlewares Globais
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'))
-app.use(express.json())
+app.use(express.json());
 
-const SECRET_KEY = process.env.JWT_SECRET // secret que vem o .env
+// Middleware de Log
+app.use((req, res, next) => {
+    console.log('📄 Requisição para:', req.method, req.originalUrl);
+    next();
+});
 
-app.post('/get-token', async (req, res) =>{
+// Rotas Específicas (devem vir ANTES do express.static)
+app.get('/', (req, res) => {
+    console.log('✅ Rota / acessada');
+
+    // Obtém o token do cookie
+    const token = req.cookies.jwtToken;
+
+    console.log('acessou o bendito token', token);
+
+    if (token) {
+        // Tenta verificar o token
+        try {
+            const user = jwt.verify(token, SECRET_KEY); // Verifica se o token é válido usando a chave secreta
+            console.log('Token válido!', user);
+
+            // Se o token for válido, redireciona para /home
+            return res.redirect('/home');
+        } catch (err) {
+            console.log('Token inválido ou expirado!', err.message);
+        }
+    }
+
+    // Se não houver token ou ele for inválido, retorna a página de login
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+
+app.post('/get-token', async (req, res) => {
     try {
+        const { username, password } = req.body;
+        const apiToken = await getToken(username, password);
 
-        const {username, password} = req.body //recebe usuario e senha do front-end
-
-        const apiToken = await getToken(username, password) //Bate na API OHIP e recebe o Token se o login for válido
-
-        if(!apiToken){ //valida se recebeu o token
-            return res.status(401).json({ error: 'Autenticação com API externa falhou' })
+        if (!apiToken) {
+            return res.status(401).json({ error: 'Autenticação com API externa falhou' });
         }
 
-        console.log('bateu na api E GEROU O TOKEN   :', apiToken)
+        console.log('Token API:', apiToken);
 
-        const jwtToken = jwt.sign({ username }, SECRET_KEY, { expiresIn: '1h' }); // faz assinatura do token usando o username e a secret que eu criei
+        const jwtToken = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        console.log('gerou o toke jwt : ' ,jwtToken)
+        console.log('Token JWT:', jwtToken);
 
         res.cookie('jwtToken', jwtToken, {
             httpOnly: true,
@@ -40,26 +70,23 @@ app.post('/get-token', async (req, res) =>{
             maxAge: 3600000
         });
 
-        res.status(200).json({ message: 'Autenticado com sucesso!' })
-        
+        res.status(200).json({ message: 'Autenticado com sucesso!', ok: true });
     } catch (error) {
-    console.error("Erro no login: ", error);
-    res.status(500).json({ error: 'Erro interno no servidor' })
+        console.error('Erro no login:', error);
+        res.status(500).json({ error: 'Erro interno no servidor' });
     }
-})
-
-// Definicao de rotas abaixo:
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 app.get('/home', authenticateToken, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'home.html')); 
+    console.log('✅ Rota /home acessada');
+    res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
-const PORT = 3000;
+// Middleware de Arquivos Estáticos (deve vir por último)
+app.use(express.static('public'));
 
+// Inicia o servidor
+const PORT = 3000;
 app.listen(PORT, () => {
-    console.log('running on port 3000!')
-})
+    console.log('🚀 Servidor rodando na porta 3000!');
+});
