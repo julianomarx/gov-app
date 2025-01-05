@@ -3,11 +3,9 @@ const jwt = require('jsonwebtoken');
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
-
 function authenticateToken(req, res, next) {
 
     const token = req.cookies.jwtToken; // Token que vem dos cookies
-
 
     if(!token) { //Valida se houve entrega de token na requisicao
         return res.redirect('/');

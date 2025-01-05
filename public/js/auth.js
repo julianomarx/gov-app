@@ -5,7 +5,6 @@ async function fetchAndStoreToken(event) {
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
-
     //Valida se os nego tão passando login em branco
     if (!data.username || !data.password) {
         console.error("Preencha todos os campos obrigatórios!");
@@ -34,9 +33,6 @@ async function fetchAndStoreToken(event) {
             window.location.href = '/home';
         }
         
-        //monta a requisicao para
-
-
     } catch (error) {
         console.error('Erro na requisição:', error.message);
     }

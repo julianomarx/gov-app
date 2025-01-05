@@ -82,6 +82,11 @@ app.get('/home', authenticateToken, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
 
+app.get('/liberar-aptos', authenticateToken, (req, res) => {
+    console.log('Acessou rota /liberar-aptos');
+    res.sendFile(path.join(__dirname, 'public', 'liberar-aptos.html'))
+})
+
 // Middleware de Arquivos Estáticos (deve vir por último)
 app.use(express.static('public'));
 
